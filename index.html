@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Генератор китайской клетки</title>
+<style>
+  :root {
+    --ink: #202124;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --panel: #ffffff;
+    --bg: #eef0f3;
+    --accent: #c84030;
+    --accent-soft: #fbe9e6;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button, input, select { font: inherit; }
+
+  .app {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ---------- controls ---------- */
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    width: 350px;
+    height: 100vh;
+    padding: 26px 26px 22px;
+    overflow-y: auto;
+    background: var(--panel);
+    border-right: 1px solid var(--line);
+    flex: 0 0 350px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .brand-mark {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 25px;
+    line-height: 1;
+    font-family: "Noto Serif CJK SC", "Songti SC", serif;
+  }
+
+  .brand h1 {
+    margin: 0;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+  }
+
+  .brand p {
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+
+  .control {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .control-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .control-head label,
+  .control > label.title {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .control-head output {
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    font-weight: 650;
+    font-size: 13px;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    height: 22px;
+    margin: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .scale-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: -6px;
+    color: #9ca3af;
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .line-tuning {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 11px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fafbfc;
+  }
+
+  .line-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .line-group + .line-group {
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+  }
+
+  .line-group-title {
+    font-size: 11.5px;
+    font-weight: 650;
+  }
+
+  .slider-row {
+    display: grid;
+    grid-template-columns: 82px 1fr 52px;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .slider-row label {
+    color: var(--muted);
+    font-size: 11px;
+    cursor: pointer;
+  }
+
+  .slider-row output {
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 650;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .slider-row input[type="range"] {
+    height: 16px;
+  }
+
+  select {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: #fff;
+    color: var(--ink);
+    cursor: pointer;
+    outline: none;
+  }
+
+  select:focus-visible,
+  input:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    outline-offset: 1px;
+  }
+
+  .radios {
+    display: grid;
+    gap: 6px;
+  }
+
+  .radio {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 9px 11px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+
+  .radio:hover { border-color: #d1d5db; }
+
+  .radio:has(input:checked) {
+    border-color: color-mix(in srgb, var(--accent) 55%, #fff);
+    background: var(--accent-soft);
+  }
+
+  .radio input {
+    margin: 2px 0 0;
+    accent-color: var(--accent);
+    flex: 0 0 auto;
+  }
+
+  .radio strong {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  .radio small {
+    display: block;
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 11.5px;
+    line-height: 1.3;
+  }
+
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .check input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .color-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .color-row input[type="color"] {
+    width: 48px;
+    height: 30px;
+    padding: 2px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat {
+    padding: 11px 12px;
+    border-radius: 10px;
+    background: #f7f8fa;
+    border: 1px solid #f0f1f3;
+  }
+
+  .stat span {
+    display: block;
+    color: var(--muted);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+
+  .stat strong {
+    display: block;
+    margin-top: 3px;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .actions {
+    display: grid;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 4px;
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-weight: 650;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, transform .05s;
+  }
+
+  .btn:active { transform: translateY(1px); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn-primary:hover { background: #b1372a; }
+
+  .btn-ghost {
+    background: #fff;
+    border-color: var(--line);
+    color: var(--ink);
+  }
+
+  .btn-ghost:hover { border-color: #c9ccd2; background: #fafafa; }
+
+  .hint {
+    margin: 0;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.45;
+    text-align: center;
+  }
+
+  /* ---------- preview ---------- */
+
+  .preview {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .preview-bar {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 14px 24px 0;
+  }
+
+  .zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(24, 30, 40, .06);
+    user-select: none;
+  }
+
+  .zoom-btn,
+  .zoom-fit {
+    height: 28px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  .zoom-btn {
+    width: 28px;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .zoom-btn:hover,
+  .zoom-fit:hover { background: #f3f4f6; }
+
+  .zoom-label {
+    min-width: 46px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .zoom-fit {
+    padding: 0 9px;
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+
+  .preview-scroll {
+    flex: 1;
+    min-height: 0;
+    padding: 18px 30px 30px;
+    overflow: auto;
+    scrollbar-gutter: stable;
+  }
+
+  .sheet-wrap {
+    width: fit-content;
+    margin: 0 auto;
+  }
+
+  .sheet {
+    display: block;
+    width: auto;
+    max-width: none;
+    height: auto;
+    background: #fff;
+    border-radius: 2px;
+    box-shadow: 0 12px 34px rgba(24, 30, 40, .16), 0 2px 6px rgba(24, 30, 40, .08);
+  }
+
+  @media (max-width: 860px) {
+    .app { flex-direction: column; }
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      flex: none;
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .preview {
+      height: 80vh;
+      min-height: 420px;
+    }
+    .preview-bar { padding: 12px 14px 0; }
+    .preview-scroll { padding: 12px 14px 20px; }
+  }
+
+  /* ---------- print ---------- */
+
+  /* Page and sheet dimensions are generated from FORMATS in updatePrintStyle(),
+     so the paper size is defined in exactly one place. */
+
+  @media print {
+    html, body {
+      background: #fff;
+      overflow: hidden;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+    .sidebar { display: none !important; }
+    .app { display: block; min-height: 0; height: auto; }
+    .preview {
+      display: block;
+      height: auto;
+      padding: 0;
+      overflow: visible;
+    }
+    .preview-bar { display: none !important; }
+    .preview-scroll {
+      display: block;
+      min-height: 0;
+      padding: 0;
+      overflow: visible;
+      scrollbar-gutter: auto;
+    }
+    .sheet-wrap { display: block; width: auto !important; margin: 0; }
+    .sheet {
+      max-width: none !important;
+      border-radius: 0;
+      box-shadow: none;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">米</div>
+      <div>
+        <h1>Генератор китайской клетки</h1>
+        <p>Ми-цзы-ге и тянь-цзы-ге для печати</p>
+      </div>
+    </div>
+
+    <div class="control">
+      <label class="title" for="format">Формат листа</label>
+      <select id="format">
+        <option value="a4" selected>A4 — 210 × 297 мм</option>
+        <option value="a5">A5 — 148 × 210 мм</option>
+        <option value="letter">Letter — 215.9 × 279.4 мм</option>
+      </select>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span>Клеток</span><strong id="gridOut">—</strong></div>
+      <div class="stat"><span>Лист</span><strong id="paperOut">A4</strong></div>
+    </div>
+
+    <div class="control">
+      <div class="control-head">
+        <label for="cell">Размер клетки</label>
+        <output id="cellOut" for="cell">16 мм</output>
+      </div>
+      <input id="cell" type="range" min="5" max="40" step="1" value="16">
+      <div class="scale-labels"><span>5 мм</span><span>40 мм</span></div>
+    </div>
+
+    <div class="control">
+      <div class="control-head">
+        <label for="margin">Отступ от краёв</label>
+        <output id="marginOut" for="margin">14 мм</output>
+      </div>
+      <input id="margin" type="range" min="0" max="40" step="1" value="14">
+      <div class="scale-labels"><span>0 мм</span><span>40 мм</span></div>
+    </div>
+
+    <div class="control">
+      <span class="title">Внутренние линии</span>
+      <div class="radios">
+        <label class="radio">
+          <input type="radio" name="guides" value="mizige" checked>
+          <span><strong>Ми-цзы-ге</strong><small>Крест и две диагонали</small></span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="guides" value="tianzige">
+          <span><strong>Тянь-цзы-ге</strong><small>Только крест</small></span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="guides" value="diagonals">
+          <span><strong>Только диагонали</strong><small>Без центрального креста</small></span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="guides" value="none">
+          <span><strong>Без внутренних линий</strong><small>Пустая сетка</small></span>
+        </label>
+      </div>
+    </div>
+
+    <label class="check">
+      <input id="dashed" type="checkbox" checked>
+      Пунктирные внутренние линии
+    </label>
+
+    <div class="line-tuning">
+      <div class="line-group">
+        <span class="line-group-title">Основные линии</span>
+        <div class="slider-row">
+          <label for="mainWidth">Толщина</label>
+          <input id="mainWidth" type="range" min="0.05" max="1" step="0.05" value="0.25">
+          <output id="mainWidthOut" for="mainWidth">0.25 мм</output>
+        </div>
+        <div class="slider-row">
+          <label for="mainOpacity">Непрозрачность</label>
+          <input id="mainOpacity" type="range" min="10" max="100" step="5" value="100">
+          <output id="mainOpacityOut" for="mainOpacity">100%</output>
+        </div>
+      </div>
+      <div class="line-group">
+        <span class="line-group-title">Дополнительные линии</span>
+        <div class="slider-row">
+          <label for="guideWidth">Толщина</label>
+          <input id="guideWidth" type="range" min="0.05" max="0.8" step="0.05" value="0.2">
+          <output id="guideWidthOut" for="guideWidth">0.2 мм</output>
+        </div>
+        <div class="slider-row">
+          <label for="guideOpacity">Непрозрачность</label>
+          <input id="guideOpacity" type="range" min="10" max="100" step="5" value="100">
+          <output id="guideOpacityOut" for="guideOpacity">100%</output>
+        </div>
+      </div>
+    </div>
+
+    <label class="check">
+      <input id="header" type="checkbox" checked>
+      Шапка «Имя / Дата»
+    </label>
+
+    <div class="color-row">
+      <label for="color">Цвет сетки</label>
+      <input id="color" type="color" value="#d23f31">
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="printBtn" type="button">Печать / PDF</button>
+      <button class="btn btn-ghost" id="svgBtn" type="button">Скачать SVG</button>
+      <p class="hint">В диалоге печати выберите «Сохранить как PDF»,<br>поля — «Нет», масштаб — 100%.</p>
+    </div>
+  </aside>
+
+  <main class="preview">
+    <div class="preview-bar">
+      <div class="zoom-controls" role="group" aria-label="Масштаб предпросмотра">
+        <button class="zoom-btn" id="zoomOut" type="button" title="Уменьшить" aria-label="Уменьшить">−</button>
+        <output class="zoom-label" id="zoomLabel" aria-live="polite">100%</output>
+        <button class="zoom-btn" id="zoomIn" type="button" title="Увеличить" aria-label="Увеличить">+</button>
+        <button class="zoom-fit" id="zoomFit" type="button" title="Вписать лист в окно">Вписать</button>
+      </div>
+    </div>
+    <div class="preview-scroll" id="previewScroll">
+      <div class="sheet-wrap" id="sheetWrap">
+        <svg id="sheet" class="sheet" xmlns="http://www.w3.org/2000/svg" role="img"
+             aria-label="Шаблон китайской прописи"></svg>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const FORMATS = {
+    a4:     { w: 210,   h: 297,   label: "A4" },
+    a5:     { w: 148,   h: 210,   label: "A5" },
+    letter: { w: 215.9, h: 279.4, label: "Letter" }
+  };
+
+  const GUIDES = {
+    mizige:    { cross: true,  diagonals: true  },
+    tianzige:  { cross: true,  diagonals: false },
+    diagonals: { cross: false, diagonals: true  },
+    none:      { cross: false, diagonals: false }
+  };
+
+  const HEADER_H = 10;             // mm reserved for the name/date line
+  const OUTER_FACTOR = 1.8;        // outer border is thicker than the cell grid
+  const DASH_LEN = 1.1;            // mm, fixed dash length
+  const DASH_PERIOD = 2.2;         // mm, nominal dash + gap period
+
+  const HEADER_FONT_SIZE = 4.2;    // mm
+  const HEADER_LINE_INSET = 2.2;   // mm from the header bottom to the line
+  const HEADER_BASELINE_GAP = 1.5; // mm between the baseline and the line
+  const HEADER_FIELD_GAP = 0.07;   // share of the grid width between fields
+  const HEADER_LINE_RATIO = 0.42;  // share of a field occupied by its line
+  const HEADER_LINE_MAX = 24;      // mm, upper bound for a field's line
+  const HEADER_LINE_WIDTH = 0.3;   // mm
+  const GUIDE_LIGHTEN = 0.48;      // how far guides are mixed towards white
+
+  const MM_TO_CSS_PX = 96 / 25.4;  // CSS defines 1in as 96px
+  const MIN_ZOOM = 0.1;
+  const MAX_ZOOM = 4;
+
+  const els = {
+    cell: document.getElementById("cell"),
+    cellOut: document.getElementById("cellOut"),
+    margin: document.getElementById("margin"),
+    marginOut: document.getElementById("marginOut"),
+    dashed: document.getElementById("dashed"),
+    mainWidth: document.getElementById("mainWidth"),
+    mainWidthOut: document.getElementById("mainWidthOut"),
+    mainOpacity: document.getElementById("mainOpacity"),
+    mainOpacityOut: document.getElementById("mainOpacityOut"),
+    guideWidth: document.getElementById("guideWidth"),
+    guideWidthOut: document.getElementById("guideWidthOut"),
+    guideOpacity: document.getElementById("guideOpacity"),
+    guideOpacityOut: document.getElementById("guideOpacityOut"),
+    header: document.getElementById("header"),
+    format: document.getElementById("format"),
+    color: document.getElementById("color"),
+    gridOut: document.getElementById("gridOut"),
+    paperOut: document.getElementById("paperOut"),
+    sheet: document.getElementById("sheet"),
+    sheetWrap: document.getElementById("sheetWrap"),
+    previewScroll: document.getElementById("previewScroll"),
+    zoomIn: document.getElementById("zoomIn"),
+    zoomOut: document.getElementById("zoomOut"),
+    zoomFit: document.getElementById("zoomFit"),
+    zoomLabel: document.getElementById("zoomLabel"),
+    printBtn: document.getElementById("printBtn"),
+    svgBtn: document.getElementById("svgBtn")
+  };
+
+  let zoom = 1;                 // absolute scale: 1 = physical size
+  let autoFit = true;           // keep fitting while the user has not zoomed
+  let currentPage = null;
+
+  function readState() {
+    return {
+      cell: Number(els.cell.value),
+      margin: Number(els.margin.value),
+      guides: document.querySelector('input[name="guides"]:checked').value,
+      dashed: els.dashed.checked,
+      mainWidth: Number(els.mainWidth.value),
+      mainOpacity: Number(els.mainOpacity.value),
+      guideWidth: Number(els.guideWidth.value),
+      guideOpacity: Number(els.guideOpacity.value),
+      header: els.header.checked,
+      format: els.format.value,
+      color: els.color.value
+    };
+  }
+
+  function num(value) {
+    return (Math.round(value * 1000) / 1000).toString();
+  }
+
+  function mixWithWhite(hex, amount) {
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+    if (!m) return "#e89a92";
+    const v = parseInt(m[1], 16);
+    const r = (v >> 16) & 255, g = (v >> 8) & 255, b = v & 255;
+    const mix = c => Math.round(c + (255 - c) * amount);
+    return "#" + [mix(r), mix(g), mix(b)]
+      .map(c => c.toString(16).padStart(2, "0"))
+      .join("");
+  }
+
+  function esc(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function layout(state) {
+    const page = FORMATS[state.format];
+    const headerH = state.header ? HEADER_H : 0;
+    const availW = page.w - 2 * state.margin;
+    const availH = page.h - 2 * state.margin - headerH;
+    const cols = Math.max(1, Math.floor(availW / state.cell + 1e-9));
+    const rows = Math.max(1, Math.floor(availH / state.cell + 1e-9));
+    const gridW = cols * state.cell;
+    const gridH = rows * state.cell;
+    const left = (page.w - gridW) / 2;
+    const top = state.margin + headerH + Math.max(0, (availH - gridH) / 2);
+    return { page, headerH, cols, rows, gridW, gridH, left, top };
+  }
+
+  function lineStyle(state) {
+    return {
+      main:  { width: state.mainWidth,  opacity: state.mainOpacity / 100,  color: state.color },
+      guide: { width: state.guideWidth, opacity: state.guideOpacity / 100, color: mixWithWhite(state.color, GUIDE_LIGHTEN) }
+    };
+  }
+
+  function sheetLabel(state) {
+    return `Китайская пропись, клетка ${state.cell} мм`;
+  }
+
+  function buildSheet(state) {
+    const layoutInfo = layout(state);
+    const { page, cols, rows, gridW, gridH, left, top } = layoutInfo;
+    const cell = state.cell;
+    const lines = lineStyle(state);
+    const light = lines.guide.color;
+
+    const out = [];
+    out.push(`<rect x="0" y="0" width="${num(page.w)}" height="${num(page.h)}" fill="#ffffff"/>`);
+
+    // Name / date header
+    if (state.header) {
+      const lineY = state.margin + layoutInfo.headerH - HEADER_LINE_INSET;
+      const baseline = lineY - HEADER_BASELINE_GAP;
+      const gap = gridW * HEADER_FIELD_GAP;
+      const fieldW = (gridW - gap) / 2;
+      const nameX = left;
+      const dateX = left + fieldW + gap;
+      const nameLine = nameX + Math.min(HEADER_LINE_MAX, fieldW * HEADER_LINE_RATIO);
+      const dateLine = dateX + Math.min(HEADER_LINE_MAX, fieldW * HEADER_LINE_RATIO);
+      const font = "system-ui, 'Noto Sans CJK SC', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif";
+
+      out.push(`<g fill="#1f2328" stroke="none" font-family="${font}" font-size="${num(HEADER_FONT_SIZE)}">`);
+      out.push(`<text x="${num(nameX)}" y="${num(baseline)}">Имя 姓名</text>`);
+      out.push(`<text x="${num(dateX)}" y="${num(baseline)}">Дата 日期</text>`);
+      out.push(`</g>`);
+      out.push(`<g stroke="${light}" stroke-width="${num(HEADER_LINE_WIDTH)}" stroke-linecap="butt">`);
+      out.push(`<line x1="${num(nameLine)}" y1="${num(lineY)}" x2="${num(nameX + fieldW)}" y2="${num(lineY)}"/>`);
+      out.push(`<line x1="${num(dateLine)}" y1="${num(lineY)}" x2="${num(dateX + fieldW)}" y2="${num(lineY)}"/>`);
+      out.push(`</g>`);
+    }
+
+    const x0 = left, y0 = top, x1 = left + gridW, y1 = top + gridH;
+    const outerW = lines.main.width * OUTER_FACTOR;
+
+    // Solid cell borders
+    const inner = [];
+    for (let i = 1; i < cols; i++) {
+      const x = x0 + i * cell;
+      inner.push(`M ${num(x)} ${num(y0)} V ${num(y1)}`);
+    }
+    for (let j = 1; j < rows; j++) {
+      const y = y0 + j * cell;
+      inner.push(`M ${num(x0)} ${num(y)} H ${num(x1)}`);
+    }
+    out.push(`<g opacity="${num(lines.main.opacity)}">`);
+    if (inner.length) {
+      out.push(`<path d="${inner.join(" ")}" fill="none" stroke="${lines.main.color}" stroke-width="${num(lines.main.width)}" stroke-linecap="square"/>`);
+    }
+    out.push(`<rect x="${num(x0)}" y="${num(y0)}" width="${num(gridW)}" height="${num(gridH)}" fill="none" stroke="${lines.main.color}" stroke-width="${num(outerW)}"/>`);
+    out.push(`</g>`);
+
+    // Guides inside cells. Each line is fitted with a whole number of dash
+    // periods per half-cell, so a dash is always centred on the intersections
+    // and the pattern does not shift when the cell size changes.
+    const guide = GUIDES[state.guides] || GUIDES.none;
+    if (guide.cross || guide.diagonals) {
+      const cross = [];
+      const diag = [];
+      const half = cell / 2;
+
+      const halfDiag = cell / Math.SQRT2;
+      // The cross gets an odd number of periods per cell: its centre lands in
+      // a gap. The diagonals keep a whole number of periods per half-cell, so
+      // their centre lands on a dash. Thus only one cross meets at the centre.
+      const crossPeriods = Math.max(1, 2 * Math.round((cell / DASH_PERIOD - 1) / 2) + 1);
+      const crossPeriod = cell / crossPeriods;
+      const diagPeriod = halfDiag / Math.max(1, Math.round(halfDiag / DASH_PERIOD));
+      const crossDash = state.dashed
+        ? ` stroke-dasharray="${num(DASH_LEN)} ${num(Math.max(0.1, crossPeriod - DASH_LEN))}" stroke-dashoffset="${num(DASH_LEN / 2)}"`
+        : "";
+      const diagDash = state.dashed
+        ? ` stroke-dasharray="${num(DASH_LEN)} ${num(Math.max(0.1, diagPeriod - DASH_LEN))}" stroke-dashoffset="${num(DASH_LEN / 2)}"`
+        : "";
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cx = x0 + c * cell, cy = y0 + r * cell;
+          const mx = cx + half, my = cy + half;
+          if (guide.cross) {
+            cross.push(`M ${num(mx)} ${num(cy)} V ${num(cy + cell)}`);
+            cross.push(`M ${num(cx)} ${num(my)} H ${num(cx + cell)}`);
+          }
+          if (guide.diagonals) {
+            diag.push(`M ${num(cx)} ${num(cy)} L ${num(cx + cell)} ${num(cy + cell)}`);
+            diag.push(`M ${num(cx + cell)} ${num(cy)} L ${num(cx)} ${num(cy + cell)}`);
+          }
+        }
+      }
+
+      out.push(`<g opacity="${num(lines.guide.opacity)}">`);
+      if (cross.length) {
+        out.push(`<path d="${cross.join(" ")}" fill="none" stroke="${light}" stroke-width="${num(lines.guide.width)}"${crossDash} stroke-linecap="butt"/>`);
+      }
+      if (diag.length) {
+        out.push(`<path d="${diag.join(" ")}" fill="none" stroke="${light}" stroke-width="${num(lines.guide.width)}"${diagDash} stroke-linecap="butt"/>`);
+      }
+      out.push(`</g>`);
+    }
+
+    return { body: out.join(""), cols, rows, page };
+  }
+
+  function serializeSheet(state, sheetData) {
+    const { page } = sheetData;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${num(page.w)}mm" height="${num(page.h)}mm" ` +
+      `viewBox="0 0 ${num(page.w)} ${num(page.h)}" role="img" aria-label="${esc(sheetLabel(state))}">` +
+      `${sheetData.body}</svg>`;
+  }
+
+  function updatePrintStyle(page) {
+    let style = document.getElementById("print-style");
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "print-style";
+      document.head.appendChild(style);
+    }
+    style.textContent =
+      `@page { size: ${num(page.w)}mm ${num(page.h)}mm; margin: 0; }\n` +
+      `@media print {\n` +
+      `  html, body { width: ${num(page.w)}mm; height: ${num(page.h)}mm; }\n` +
+      `  .sheet { width: ${num(page.w)}mm !important; height: ${num(page.h)}mm !important; }\n` +
+      `}`;
+  }
+
+  function applyZoom() {
+    if (!currentPage) return;
+    const width = currentPage.w * MM_TO_CSS_PX * zoom;
+    els.sheet.style.width = width + "px";
+    els.sheet.style.maxWidth = "none";
+    els.sheetWrap.style.width = width + "px";
+    els.zoomLabel.textContent = Math.round(zoom * 100) + "%";
+  }
+
+  function measureFit(page) {
+    currentPage = page;
+    const cs = getComputedStyle(els.previewScroll);
+    const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    const availW = Math.max(120, els.previewScroll.clientWidth - padX);
+    const availH = Math.max(120, els.previewScroll.clientHeight - padY);
+    const ratio = page.w / page.h;
+    const fitWidth = Math.max(120, Math.min(availW, availH * ratio));
+    const fitScale = fitWidth / (page.w * MM_TO_CSS_PX);
+    if (autoFit) zoom = fitScale;
+    applyZoom();
+  }
+
+  function setZoom(value) {
+    autoFit = false;
+    zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value));
+    applyZoom();
+  }
+
+  function render() {
+    const state = readState();
+    const sheetData = buildSheet(state);
+
+    els.cellOut.textContent = state.cell + " мм";
+    els.marginOut.textContent = state.margin + " мм";
+    els.mainWidthOut.textContent = num(state.mainWidth) + " мм";
+    els.mainOpacityOut.textContent = state.mainOpacity + "%";
+    els.guideWidthOut.textContent = num(state.guideWidth) + " мм";
+    els.guideOpacityOut.textContent = state.guideOpacity + "%";
+    els.gridOut.textContent = sheetData.cols + " × " + sheetData.rows;
+    els.paperOut.textContent = sheetData.page.label;
+
+    els.sheet.setAttribute("viewBox", `0 0 ${num(sheetData.page.w)} ${num(sheetData.page.h)}`);
+    els.sheet.setAttribute("width", `${num(sheetData.page.w)}mm`);
+    els.sheet.setAttribute("height", `${num(sheetData.page.h)}mm`);
+    els.sheet.innerHTML = sheetData.body;
+    els.sheet.setAttribute("aria-label", sheetLabel(state));
+
+    updatePrintStyle(sheetData.page);
+    measureFit(sheetData.page);
+  }
+
+  let frame = 0;
+  function scheduleRender() {
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      render();
+    });
+  }
+
+  els.cell.addEventListener("input", scheduleRender);
+  els.margin.addEventListener("input", scheduleRender);
+  els.dashed.addEventListener("change", scheduleRender);
+  els.mainWidth.addEventListener("input", scheduleRender);
+  els.mainOpacity.addEventListener("input", scheduleRender);
+  els.guideWidth.addEventListener("input", scheduleRender);
+  els.guideOpacity.addEventListener("input", scheduleRender);
+  els.header.addEventListener("change", scheduleRender);
+  els.format.addEventListener("change", scheduleRender);
+  els.color.addEventListener("input", scheduleRender);
+  document.querySelectorAll('input[name="guides"]').forEach(el => {
+    el.addEventListener("change", scheduleRender);
+  });
+
+  els.zoomIn.addEventListener("click", () => setZoom(zoom + 0.25));
+  els.zoomOut.addEventListener("click", () => setZoom(zoom - 0.25));
+  els.zoomFit.addEventListener("click", () => {
+    autoFit = true;
+    if (currentPage) measureFit(currentPage);
+  });
+
+  els.previewScroll.addEventListener("wheel", (event) => {
+    if (!(event.ctrlKey || event.metaKey)) return;
+    event.preventDefault();
+    setZoom(zoom * (event.deltaY < 0 ? 1.12 : 0.89));
+  }, { passive: false });
+
+  let resizeFrame = 0;
+  window.addEventListener("resize", () => {
+    if (resizeFrame) cancelAnimationFrame(resizeFrame);
+    resizeFrame = requestAnimationFrame(() => {
+      resizeFrame = 0;
+      if (currentPage) measureFit(currentPage);
+    });
+  });
+
+  els.printBtn.addEventListener("click", () => window.print());
+
+  els.svgBtn.addEventListener("click", () => {
+    const state = readState();
+    const sheetData = buildSheet(state);
+    const blob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + serializeSheet(state, sheetData)], {
+      type: "image/svg+xml;charset=utf-8"
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `chinese-grid-${state.cell}mm-${state.format}.svg`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+
+  function parseFlag(raw) {
+    if (raw === "0" || raw === "false") return false;
+    if (raw === "1" || raw === "true") return true;
+    return null;
+  }
+
+  // Allow generating a PDF from the command line, e.g.
+  // index.html?cell=16&margin=14&guides=mizige&format=a4&header=1
+  (function applyQuery() {
+    const q = new URLSearchParams(location.search);
+    if (![...q.keys()].length) return;
+
+    const RANGE_PARAMS = [
+      ["cell", els.cell],
+      ["margin", els.margin],
+      ["mainWidth", els.mainWidth],
+      ["mainOpacity", els.mainOpacity],
+      ["guideWidth", els.guideWidth],
+      ["guideOpacity", els.guideOpacity]
+    ];
+    for (const [name, el] of RANGE_PARAMS) {
+      const raw = q.get(name);
+      if (raw === null || raw.trim() === "" || Number.isNaN(Number(raw))) continue;
+      el.value = raw;
+    }
+
+    const format = q.get("format");
+    if (format && FORMATS[format]) els.format.value = format;
+
+    const header = parseFlag(q.get("header"));
+    if (header !== null) els.header.checked = header;
+
+    const dashed = parseFlag(q.get("dashed"));
+    if (dashed !== null) els.dashed.checked = dashed;
+
+    const zoomParam = q.get("zoom");
+    if (zoomParam !== null && zoomParam.trim() !== "" &&
+        Number.isFinite(Number(zoomParam)) && Number(zoomParam) > 0) {
+      zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Number(zoomParam)));
+      autoFit = false;
+    }
+
+    const color = q.get("color");
+    if (color && /^#[0-9a-f]{6}$/i.test(color)) els.color.value = color;
+
+    const guides = q.get("guides");
+    if (guides) {
+      const radio = document.querySelector(`input[name="guides"][value="${CSS.escape(guides)}"]`);
+      if (radio) radio.checked = true;
+    }
+  })();
+
+  render();
+})();
+</script>
+</body>
+</html>
