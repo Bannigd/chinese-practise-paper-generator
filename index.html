@@ -362,7 +362,40 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    gap: 10px;
     padding: 14px 24px 0;
+  }
+
+  .lang-switch {
+    display: flex;
+    gap: 2px;
+    padding: 4px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(24, 30, 40, .06);
+    user-select: none;
+  }
+
+  .lang-btn {
+    min-width: 30px;
+    height: 28px;
+    padding: 0 7px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    cursor: pointer;
+  }
+
+  .lang-btn:hover { background: #f3f4f6; }
+
+  .lang-btn[aria-pressed="true"] {
+    background: var(--accent-soft);
+    color: var(--accent);
   }
 
   .zoom-controls {
@@ -495,93 +528,93 @@
     <div class="brand">
       <div class="brand-mark" aria-hidden="true">米</div>
       <div>
-        <h1>Генератор китайской клетки</h1>
-        <p>Ми-цзы-ге и тянь-цзы-ге для печати</p>
+        <h1 data-i18n="brandTitle">Генератор китайской клетки</h1>
+        <p data-i18n="brandSubtitle">Ми-цзы-ге и тянь-цзы-ге для печати</p>
       </div>
     </div>
 
     <div class="control">
-      <label class="title" for="format">Формат листа</label>
+      <label class="title" for="format" data-i18n="format">Формат листа</label>
       <select id="format">
-        <option value="a4" selected>A4 — 210 × 297 мм</option>
-        <option value="a5">A5 — 148 × 210 мм</option>
-        <option value="letter">Letter — 215.9 × 279.4 мм</option>
+        <option value="a4" selected data-i18n="formatA4">A4 — 210 × 297 мм</option>
+        <option value="a5" data-i18n="formatA5">A5 — 148 × 210 мм</option>
+        <option value="letter" data-i18n="formatLetter">Letter — 215.9 × 279.4 мм</option>
       </select>
     </div>
 
     <div class="stats">
-      <div class="stat"><span>Клеток</span><strong id="gridOut">—</strong></div>
-      <div class="stat"><span>Лист</span><strong id="paperOut">A4</strong></div>
+      <div class="stat"><span data-i18n="cells">Клеток</span><strong id="gridOut">—</strong></div>
+      <div class="stat"><span data-i18n="paper">Лист</span><strong id="paperOut">A4</strong></div>
     </div>
 
     <div class="control">
       <div class="control-head">
-        <label for="cell">Размер клетки</label>
+        <label for="cell" data-i18n="cellSize">Размер клетки</label>
         <output id="cellOut" for="cell">16 мм</output>
       </div>
       <input id="cell" type="range" min="5" max="40" step="1" value="16">
-      <div class="scale-labels"><span>5 мм</span><span>40 мм</span></div>
+      <div class="scale-labels"><span data-i18n="rangeCellMin">5 мм</span><span data-i18n="rangeCellMax">40 мм</span></div>
     </div>
 
     <div class="control">
       <div class="control-head">
-        <label for="margin">Отступ от краёв</label>
+        <label for="margin" data-i18n="margin">Отступ от краёв</label>
         <output id="marginOut" for="margin">14 мм</output>
       </div>
       <input id="margin" type="range" min="0" max="40" step="1" value="14">
-      <div class="scale-labels"><span>0 мм</span><span>40 мм</span></div>
+      <div class="scale-labels"><span data-i18n="rangeMarginMin">0 мм</span><span data-i18n="rangeMarginMax">40 мм</span></div>
     </div>
 
     <div class="control">
-      <span class="title">Внутренние линии</span>
+      <span class="title" data-i18n="guides">Внутренние линии</span>
       <div class="radios">
         <label class="radio">
           <input type="radio" name="guides" value="mizige" checked>
-          <span><strong>Ми-цзы-ге</strong><small>Крест и две диагонали</small></span>
+          <span><strong data-i18n="guidesMizige">Ми-цзы-ге</strong><small data-i18n="guidesMizigeHint">Крест и две диагонали</small></span>
         </label>
         <label class="radio">
           <input type="radio" name="guides" value="tianzige">
-          <span><strong>Тянь-цзы-ге</strong><small>Только крест</small></span>
+          <span><strong data-i18n="guidesTianzige">Тянь-цзы-ге</strong><small data-i18n="guidesTianzigeHint">Только крест</small></span>
         </label>
         <label class="radio">
           <input type="radio" name="guides" value="diagonals">
-          <span><strong>Только диагонали</strong><small>Без центрального креста</small></span>
+          <span><strong data-i18n="guidesDiagonals">Только диагонали</strong><small data-i18n="guidesDiagonalsHint">Без центрального креста</small></span>
         </label>
         <label class="radio">
           <input type="radio" name="guides" value="none">
-          <span><strong>Без внутренних линий</strong><small>Пустая сетка</small></span>
+          <span><strong data-i18n="guidesNone">Без внутренних линий</strong><small data-i18n="guidesNoneHint">Пустая сетка</small></span>
         </label>
       </div>
     </div>
 
     <label class="check">
       <input id="dashed" type="checkbox" checked>
-      Пунктирные внутренние линии
+      <span data-i18n="dashed">Пунктирные внутренние линии</span>
     </label>
 
     <div class="line-tuning">
       <div class="line-group">
-        <span class="line-group-title">Основные линии</span>
+        <span class="line-group-title" data-i18n="mainLines">Основные линии</span>
         <div class="slider-row">
-          <label for="mainWidth">Толщина</label>
+          <label for="mainWidth" data-i18n="width">Толщина</label>
           <input id="mainWidth" type="range" min="0.05" max="1" step="0.05" value="0.25">
           <output id="mainWidthOut" for="mainWidth">0.25 мм</output>
         </div>
         <div class="slider-row">
-          <label for="mainOpacity">Непрозрачность</label>
+          <label for="mainOpacity" data-i18n="opacity">Непрозрачность</label>
           <input id="mainOpacity" type="range" min="10" max="100" step="5" value="100">
           <output id="mainOpacityOut" for="mainOpacity">100%</output>
         </div>
       </div>
       <div class="line-group">
-        <span class="line-group-title">Дополнительные линии</span>
+        <span class="line-group-title" data-i18n="guideLines">Дополнительные линии</span>
         <div class="slider-row">
-          <label for="guideWidth">Толщина</label>
+          <label for="guideWidth" data-i18n="width">Толщина</label>
           <input id="guideWidth" type="range" min="0.05" max="0.8" step="0.05" value="0.2">
           <output id="guideWidthOut" for="guideWidth">0.2 мм</output>
         </div>
         <div class="slider-row">
-          <label for="guideOpacity">Непрозрачность</label>
+          <label for="guideOpacity" data-i18n="opacity">Непрозрачность</label>
           <input id="guideOpacity" type="range" min="10" max="100" step="5" value="100">
           <output id="guideOpacityOut" for="guideOpacity">100%</output>
         </div>
@@ -590,28 +623,32 @@
 
     <label class="check">
       <input id="header" type="checkbox" checked>
-      Шапка «Имя / Дата»
+      <span data-i18n="header">Шапка «Имя / Дата»</span>
     </label>
 
     <div class="color-row">
-      <label for="color">Цвет сетки</label>
+      <label for="color" data-i18n="color">Цвет сетки</label>
       <input id="color" type="color" value="#d23f31">
     </div>
 
     <div class="actions">
-      <button class="btn btn-primary" id="printBtn" type="button">Печать / PDF</button>
-      <button class="btn btn-ghost" id="svgBtn" type="button">Скачать SVG</button>
-      <p class="hint">В диалоге печати выберите «Сохранить как PDF»,<br>поля — «Нет», масштаб — 100%.</p>
+      <button class="btn btn-primary" id="printBtn" type="button" data-i18n="print">Печать / PDF</button>
+      <button class="btn btn-ghost" id="svgBtn" type="button" data-i18n="downloadSvg">Скачать SVG</button>
+      <p class="hint"><span data-i18n="printHint1">В диалоге печати выберите «Сохранить как PDF»,</span><br><span data-i18n="printHint2">поля — «Нет», масштаб — 100%.</span></p>
     </div>
   </aside>
 
   <main class="preview">
     <div class="preview-bar">
-      <div class="zoom-controls" role="group" aria-label="Масштаб предпросмотра">
-        <button class="zoom-btn" id="zoomOut" type="button" title="Уменьшить" aria-label="Уменьшить">−</button>
+      <div class="lang-switch" role="group" aria-label="Язык интерфейса" data-i18n-aria-label="language">
+        <button class="lang-btn" type="button" data-lang="ru" aria-pressed="false">RU</button>
+        <button class="lang-btn" type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <div class="zoom-controls" role="group" aria-label="Масштаб предпросмотра" data-i18n-aria-label="zoomGroup">
+        <button class="zoom-btn" id="zoomOut" type="button" title="Уменьшить" aria-label="Уменьшить" data-i18n-title="zoomOut" data-i18n-aria-label="zoomOut">−</button>
         <output class="zoom-label" id="zoomLabel" aria-live="polite">100%</output>
-        <button class="zoom-btn" id="zoomIn" type="button" title="Увеличить" aria-label="Увеличить">+</button>
-        <button class="zoom-fit" id="zoomFit" type="button" title="Вписать лист в окно">Вписать</button>
+        <button class="zoom-btn" id="zoomIn" type="button" title="Увеличить" aria-label="Увеличить" data-i18n-title="zoomIn" data-i18n-aria-label="zoomIn">+</button>
+        <button class="zoom-fit" id="zoomFit" type="button" title="Вписать лист в окно" data-i18n-title="fitTitle" data-i18n="fit">Вписать</button>
       </div>
     </div>
     <div class="preview-scroll" id="previewScroll">
@@ -639,6 +676,161 @@
     diagonals: { cross: false, diagonals: true  },
     none:      { cross: false, diagonals: false }
   };
+
+  const LANG_KEY = "chinese-grid.lang";
+  const I18N = {
+    ru: {
+      documentTitle: "Генератор китайской клетки",
+      brandTitle: "Генератор китайской клетки",
+      brandSubtitle: "Ми-цзы-ге и тянь-цзы-ге для печати",
+      format: "Формат листа",
+      formatA4: "A4 — 210 × 297 мм",
+      formatA5: "A5 — 148 × 210 мм",
+      formatLetter: "Letter — 215.9 × 279.4 мм",
+      cells: "Клеток",
+      paper: "Лист",
+      cellSize: "Размер клетки",
+      margin: "Отступ от краёв",
+      mm: "мм",
+      guides: "Внутренние линии",
+      guidesMizige: "Ми-цзы-ге",
+      guidesMizigeHint: "Крест и две диагонали",
+      guidesTianzige: "Тянь-цзы-ге",
+      guidesTianzigeHint: "Только крест",
+      guidesDiagonals: "Только диагонали",
+      guidesDiagonalsHint: "Без центрального креста",
+      guidesNone: "Без внутренних линий",
+      guidesNoneHint: "Пустая сетка",
+      dashed: "Пунктирные внутренние линии",
+      mainLines: "Основные линии",
+      guideLines: "Дополнительные линии",
+      width: "Толщина",
+      opacity: "Непрозрачность",
+      header: "Шапка «Имя / Дата»",
+      color: "Цвет сетки",
+      print: "Печать / PDF",
+      downloadSvg: "Скачать SVG",
+      printHint1: "В диалоге печати выберите «Сохранить как PDF»,",
+      printHint2: "поля — «Нет», масштаб — 100%.",
+      zoomOut: "Уменьшить",
+      zoomIn: "Увеличить",
+      fit: "Вписать",
+      fitTitle: "Вписать лист в окно",
+      zoomGroup: "Масштаб предпросмотра",
+      language: "Язык интерфейса",
+      headerName: "Имя 姓名",
+      headerDate: "Дата 日期",
+      sheetAria: "Китайская пропись, клетка {cell} мм",
+      rangeCellMin: "5 мм",
+      rangeCellMax: "40 мм",
+      rangeMarginMin: "0 мм",
+      rangeMarginMax: "40 мм"
+    },
+    en: {
+      documentTitle: "Chinese Practice Grid Generator",
+      brandTitle: "Chinese Practice Grid Generator",
+      brandSubtitle: "Mi-zi-ge and Tian-zi-ge practice sheets for printing",
+      format: "Paper format",
+      formatA4: "A4 — 210 × 297 mm",
+      formatA5: "A5 — 148 × 210 mm",
+      formatLetter: "Letter — 215.9 × 279.4 mm",
+      cells: "Cells",
+      paper: "Paper",
+      cellSize: "Cell size",
+      margin: "Margin",
+      mm: "mm",
+      guides: "Inner guides",
+      guidesMizige: "Mi-zi-ge",
+      guidesMizigeHint: "Cross and two diagonals",
+      guidesTianzige: "Tian-zi-ge",
+      guidesTianzigeHint: "Cross only",
+      guidesDiagonals: "Diagonals only",
+      guidesDiagonalsHint: "No central cross",
+      guidesNone: "No inner guides",
+      guidesNoneHint: "Empty grid",
+      dashed: "Dashed inner guides",
+      mainLines: "Main lines",
+      guideLines: "Guide lines",
+      width: "Width",
+      opacity: "Opacity",
+      header: "“Name / Date” header",
+      color: "Grid color",
+      print: "Print / PDF",
+      downloadSvg: "Download SVG",
+      printHint1: "In the print dialog choose “Save as PDF”,",
+      printHint2: "margins — “None”, scale — 100%.",
+      zoomOut: "Zoom out",
+      zoomIn: "Zoom in",
+      fit: "Fit",
+      fitTitle: "Fit the sheet to the window",
+      zoomGroup: "Preview zoom",
+      language: "Interface language",
+      headerName: "Name 姓名",
+      headerDate: "Date 日期",
+      sheetAria: "Chinese practice sheet, {cell} mm cell",
+      rangeCellMin: "5 mm",
+      rangeCellMax: "40 mm",
+      rangeMarginMin: "0 mm",
+      rangeMarginMax: "40 mm"
+    }
+  };
+
+  function readStoredLang() {
+    try {
+      return localStorage.getItem(LANG_KEY);
+    } catch {
+      return null;
+    }
+  }
+
+  function storeLang(value) {
+    try {
+      localStorage.setItem(LANG_KEY, value);
+    } catch {
+      // Storage can be unavailable (private mode, file:// restrictions).
+    }
+  }
+
+  function detectLang() {
+    const fromUrl = new URLSearchParams(location.search).get("lang");
+    if (fromUrl && I18N[fromUrl]) return fromUrl;
+    const stored = readStoredLang();
+    if (stored && I18N[stored]) return stored;
+    return (navigator.language || "").toLowerCase().startsWith("ru") ? "ru" : "en";
+  }
+
+  let lang = detectLang();
+
+  function t(key, vars) {
+    let value = (I18N[lang] && I18N[lang][key]) || I18N.en[key] || key;
+    if (vars) {
+      for (const [name, replacement] of Object.entries(vars)) {
+        value = value.split(`{${name}}`).join(String(replacement));
+      }
+    }
+    return value;
+  }
+
+  function setLanguage(next, persist) {
+    if (!I18N[next]) return;
+    lang = next;
+    document.documentElement.lang = next;
+    document.title = t("documentTitle");
+
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+      el.textContent = t(el.dataset.i18n);
+    });
+    document.querySelectorAll("[data-i18n-title]").forEach(el => {
+      el.title = t(el.dataset.i18nTitle);
+    });
+    document.querySelectorAll("[data-i18n-aria-label]").forEach(el => {
+      el.setAttribute("aria-label", t(el.dataset.i18nAriaLabel));
+    });
+    document.querySelectorAll("[data-lang]").forEach(el => {
+      el.setAttribute("aria-pressed", String(el.dataset.lang === next));
+    });
+    if (persist) storeLang(next);
+  }
 
   const HEADER_H = 10;             // mm reserved for the name/date line
   const OUTER_FACTOR = 1.8;        // outer border is thicker than the cell grid
@@ -753,7 +945,7 @@
   }
 
   function sheetLabel(state) {
-    return `Китайская пропись, клетка ${state.cell} мм`;
+    return t("sheetAria", { cell: state.cell });
   }
 
   function buildSheet(state) {
@@ -779,8 +971,8 @@
       const font = "system-ui, 'Noto Sans CJK SC', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif";
 
       out.push(`<g fill="#1f2328" stroke="none" font-family="${font}" font-size="${num(HEADER_FONT_SIZE)}">`);
-      out.push(`<text x="${num(nameX)}" y="${num(baseline)}">Имя 姓名</text>`);
-      out.push(`<text x="${num(dateX)}" y="${num(baseline)}">Дата 日期</text>`);
+      out.push(`<text x="${num(nameX)}" y="${num(baseline)}">${esc(t("headerName"))}</text>`);
+      out.push(`<text x="${num(dateX)}" y="${num(baseline)}">${esc(t("headerDate"))}</text>`);
       out.push(`</g>`);
       out.push(`<g stroke="${light}" stroke-width="${num(HEADER_LINE_WIDTH)}" stroke-linecap="butt">`);
       out.push(`<line x1="${num(nameLine)}" y1="${num(lineY)}" x2="${num(nameX + fieldW)}" y2="${num(lineY)}"/>`);
@@ -914,11 +1106,11 @@
     const state = readState();
     const sheetData = buildSheet(state);
 
-    els.cellOut.textContent = state.cell + " мм";
-    els.marginOut.textContent = state.margin + " мм";
-    els.mainWidthOut.textContent = num(state.mainWidth) + " мм";
+    els.cellOut.textContent = state.cell + " " + t("mm");
+    els.marginOut.textContent = state.margin + " " + t("mm");
+    els.mainWidthOut.textContent = num(state.mainWidth) + " " + t("mm");
     els.mainOpacityOut.textContent = state.mainOpacity + "%";
-    els.guideWidthOut.textContent = num(state.guideWidth) + " мм";
+    els.guideWidthOut.textContent = num(state.guideWidth) + " " + t("mm");
     els.guideOpacityOut.textContent = state.guideOpacity + "%";
     els.gridOut.textContent = sheetData.cols + " × " + sheetData.rows;
     els.paperOut.textContent = sheetData.page.label;
@@ -954,6 +1146,12 @@
   els.color.addEventListener("input", scheduleRender);
   document.querySelectorAll('input[name="guides"]').forEach(el => {
     el.addEventListener("change", scheduleRender);
+  });
+  document.querySelectorAll("[data-lang]").forEach(button => {
+    button.addEventListener("click", () => {
+      setLanguage(button.dataset.lang, true);
+      render();
+    });
   });
 
   els.zoomIn.addEventListener("click", () => setZoom(zoom + 0.25));
@@ -1048,6 +1246,7 @@
     }
   })();
 
+  setLanguage(lang);
   render();
 })();
 </script>
