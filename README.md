@@ -5,6 +5,8 @@ tian-zi-ge (田字格), or an empty grid. One HTML file, no dependencies, no int
 
 [Русский](README.ru.md)
 
+![Generator preview](preview.png)
+
 ## Usage
 
 1. Open `index.html` in a browser.
